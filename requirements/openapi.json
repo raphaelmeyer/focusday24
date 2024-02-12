@@ -1,0 +1,429 @@
+{
+	"openapi": "3.0.0",
+	"info": {
+		"title": "bbv Time Tracker",
+		"version": "1.0.0",
+		"description": "This is the backend API for the bbv Time Tracker. At this point in time, no authentication is needed to access it.\n\nFirst and foremost, it is used for accessing, adding, editing and deleting work time entries. To enable all frontend features, it also contains routes for authentication via an SSO provider and a voice-to-text (VTT) route to enable transcription of entry summary descriptions.",
+		"contact": {
+			"name": "bbv Software Services",
+			"email": "jan.maslov@bbv.ch",
+			"url": "https://bbv.ch"
+		}
+	},
+	"paths": {
+		"/times/{date}": {
+			"get": {
+				"summary": "Get the current user's time entries by date.",
+				"parameters": [
+					{
+						"name": "date",
+						"description": "The date to get time entries for, as an ISO 8106 date.",
+						"schema": {
+							"type": "string",
+							"format": "date"
+						},
+						"example": "2024-03-05",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/TimeEntry"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorResponse"
+					}
+				},
+				"operationId": "times-get"
+			}
+		},
+		"/times/{id}": {
+			"get": {
+				"summary": "Get one of the current user's time entries by database Id.",
+				"parameters": [
+					{"$ref": "#/components/parameters/id"}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TimeEntry"
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorResponse"
+					}
+				},
+				"operationId": "times-get-single"
+			},
+			"delete": {
+				"summary": "Delete one of the current user's time entries by database Id.",
+				"parameters": [
+					{"$ref": "#/components/parameters/id"}
+				],
+				"responses": {
+					"200": {
+						"description": "OK"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorResponse"
+					}
+				},
+				"operationId": "times-delete"
+			},
+			"patch": {
+				"summary": "Find and edit one of the current user's time entries by database Id.",
+				"parameters": [
+					{"$ref": "#/components/parameters/id"}
+				],
+				"requestBody": {
+					"required": true,
+					"description": "A form containing some or all fields to edit a time entry.",
+					"content": {
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"start": {
+										"type": "integer",
+										"description": "The timestamp of when this work interval begun.",
+										"example": 1707823719111
+									},
+									"end": {
+										"type": "integer",
+										"description": "The timestamp of when this work interval ended.",
+										"example": 1707841809227
+									},
+									"description": {
+										"type": "string",
+										"description": "A short summary of the work done in the given time frame. In either HTML or plain text.",
+										"example": "<p><ul><li>Performed upgrades to the infrastructure</li></ul></p>"
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TimeEntry"
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorResponse"
+					}
+				},
+				"operationId": "times-edit"
+			}
+		},
+		"/times": {
+			"post": {
+				"summary": "Create a new time entry for the current user.",
+				"requestBody": {
+					"required": true,
+					"description": "A form containing data to create a new time entry.",
+					"content": {
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"type": "object",
+								"required": ["userId", "start", "description"],
+								"properties": {
+									"userId": {
+										"type": "string",
+										"description": "The database Id of the user this time entry belongs to. Depends on the database used. Usually an integer for SQL, and a string for MongoDB.",
+										"example": "167"
+									},
+									"start": {
+										"type": "integer",
+										"description": "The timestamp of when this work interval begun.",
+										"example": 1707823719111
+									},
+									"end": {
+										"type": "integer",
+										"description": "The timestamp of when this work interval ended.",
+										"example": 1707841809227
+									},
+									"description": {
+										"type": "string",
+										"description": "A short summary of the work done in the given time frame. In either HTML or plain text.",
+										"example": "<p><ul><li>Performed upgrades to the infrastructure</li></ul></p>"
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TimeEntry"
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorResponse"
+					}
+				},
+				"operationId": "times-create"
+			}
+		},
+		"/vtt": {
+			"post": {
+				"summary": "Sends a recorded audio file to be transcribed and summarized.",
+				"requestBody": {
+					"required": true,
+					"description": "A form containing a voice recording (encoded as AAC, MP3 or WAV).",
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"required": ["voicememo"],
+								"properties": {
+									"voicememo": {
+										"type": "string",
+										"format": "binary",
+										"description": "The file containing the voice recording."
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"example": {
+									"summary": "<p><ul><li>Performed upgrades to the infrastructure</li></ul></p>"
+								},
+								"schema": {
+									"type": "object",
+									"properties": {
+										"summary": {
+											"type": "string",
+											"description": "A short summary of what was said in the voice recording, in HTML."
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorResponse"
+					}
+				},
+				"operationId": "vtt-send"
+			}
+		},
+		"/tickets/{userId}": {
+			"get": {
+				"summary": "Gets the current user's tickets by Id.",
+				"description": "UNIMPLEMENTED, because ticketing system's API is unknown at this time.",
+				"parameters": [
+					{
+						"name": "userId",
+						"description": "The current user's database ID to get tickets for.",
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"required": true
+					},
+					{
+						"name": "status",
+						"description": "Filter tickets by status.",
+						"schema": {
+							"type": "string",
+							"enum": ["OPEN", "CLOSED"]
+						},
+						"in": "query",
+						"required": false
+					},
+					{
+						"name": "startdate",
+						"description": "Filter tickets starting from date.",
+						"schema": {
+							"format": "date",
+							"type": "string"
+						},
+						"in": "query",
+						"required": false
+					},
+					{
+						"name": "enddate",
+						"description": "Filter tickets up to date.",
+						"schema": {
+							"format": "date",
+							"type": "string"
+						},
+						"in": "query",
+						"required": false
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"example": {
+									
+								},
+								"schema": {
+									"type": "array",
+									"items": {
+										"properties": {
+											"title": {
+												"type": "string",
+												"description": "The ticket's title."
+											},
+											"description": {
+												"type": "string",
+												"description": "The ticket's description text."
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorResponse"
+					}
+				},
+				"operationId": "tickets-get"
+			}
+		},
+		"/sign-in": {
+			"get": {
+				"summary": "Signs in a user via an external SSO provider.",
+				"responses": {
+					"301": {
+						"description": "Sign-in successful. Redirecting to SSO provider's login page"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorResponse"
+					}
+				}
+			}
+		},
+		"/sign-out": {
+			"get": {
+				"summary": "Signs a user out",
+				"responses": {
+					"200": {
+						"description": "Successful sign out. The authenticated session with the SSO provider was deleted."
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorResponse"
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "http://localhost:8080",
+			"description": "The main backend address.",
+			"variables": {},
+			"x-last-modified": 1707818650562
+		}
+	],
+	"security": [],
+	"components": {
+		"securitySchemes": {},
+		"schemas": {
+			"TimeEntry": {
+				"type": "object",
+				"description": "A user's time entry. Contains start and end timestamps and a description of the work done.",
+				"required": ["id", "userId", "start", "description"],
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "The database Id of the time entry. Depends on the database used. Usually an integer for SQL, and a string for MongoDB.",
+						"example": "1243"
+					},
+					"userId": {
+						"type": "string",
+						"description": "The database Id of the user this time entry belongs to. Depends on the database used. Usually an integer for SQL, and a string for MongoDB.",
+						"example": "167"
+					},
+					"start": {
+						"type": "integer",
+						"description": "The timestamp of when this work interval begun.",
+						"example": 1707823719111
+					},
+					"end": {
+						"type": "integer",
+						"description": "The timestamp of when this work interval ended.",
+						"example": 1707841809227
+					},
+					"description": {
+						"type": "string",
+						"description": "A short summary of the work done in the given time frame. In either HTML or plain text.",
+						"example": "<p><ul><li>Performed upgrades to the infrastructure</li></ul></p>"
+					}
+				}
+			}
+		},
+		"headers": {},
+		"responses": {
+			"ErrorResponse": {
+				"description": "The server encountered an error.",
+				"content": {
+					"text/plain": {
+						"example": "The server encountered an error. Please try again later."
+					}
+				}
+			}
+		},
+		"parameters": {
+			"id": {
+				"name": "id",
+				"description": "A time entry's database Id.",
+				"schema": {
+					"type": "string"
+				},
+				"examples": {
+					"sqlite": {
+						"value": "1243",
+						"summary": "SQLite",
+						"description": "For when using an SQLite database."
+					},
+					"mongodb": {
+						"value": "507f191e810c19729de860ea",
+						"summary": "MongoDB",
+						"description": "For when using a MongoDB database."
+					}
+				},
+				"in": "path",
+				"required": true
+			}
+		}
+	}
+}

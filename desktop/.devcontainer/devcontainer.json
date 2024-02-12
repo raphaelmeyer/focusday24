@@ -1,0 +1,19 @@
+{
+  "name": "Desktop Container",
+  "dockerComposeFile": "../../docker-compose.yml",
+  "service": "desktop",
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint"],
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      }
+    }
+  },
+  
+  "shutdownAction": "stopCompose",
+
+  "overrideCommand": true
+}
+

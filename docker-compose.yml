@@ -1,0 +1,135 @@
+version: '3.8'
+
+services:
+
+  # Actual services
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_container
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - focus-day-network
+
+  sqlite:
+    image: nouchka/sqlite3:latest
+    container_name: sqlite_container
+    volumes:
+      - sqlite_data:/root/db
+    networks:
+      - focus-day-network
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  swaggerui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger_ui_container
+    ports:
+      - "8001:8080"
+    environment:
+      SWAGGER_JSON: /docs/openapi.json
+      BASE_URL: /swagger
+    volumes:
+      - ./requirements/openapi.json:/docs/openapi.json
+
+  openapi_mock:
+    container_name: server_mock
+    image: jormaechea/open-api-mocker
+    volumes:
+      - ./requirements/openapi.json:/app/schema.json
+    ports:
+      - "8002:5000"
+
+  ollama:
+    image: ollama/ollama:latest
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ollama:/root/.ollama
+      - ./start-ollama.sh:/start-ollama.sh
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - focus-day-network
+
+  
+  focusday24:
+    # Builds a base image used in frontend, backend, desktop ...
+    # Prod/Dev determined by environment variable
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+      target: focusday24${ENVIRONMENT:-dev}
+    image: focusday24:latest
+
+  # Software development
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    container_name: frontend_container
+    volumes:
+      - ./:/workspace
+  
+    ports:
+      - "8003:6734"
+    env_file:
+      - .env
+      - ./frontend/.env.${ENVIRONMENT:-dev}
+    depends_on:
+      - backend
+      - ollama
+      - focusday24
+    networks:
+      - focus-day-network
+
+  desktop:
+    build:
+      context: ./desktop
+      dockerfile: ./Dockerfile
+    container_name: desktop_container
+    volumes:
+      - ./:/workspace
+    ports:
+      - "8004:80"
+    env_file:
+      - .env
+      - ./desktop/.env.${ENVIRONMENT:-dev}
+    depends_on:
+      - backend
+      - ollama
+      - focusday24
+    networks:
+      - focus-day-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    container_name: backend_container
+    volumes:
+      - ./:/workspace
+    env_file:
+      - .env
+      - ./backend/.env.${ENVIRONMENT:-dev}
+    depends_on:
+      - mongodb
+      - sqlite
+      - ollama
+      - focusday24
+    networks:
+      - focus-day-network
+
+volumes:
+  mongodb_data:
+  sqlite_data:
+  ollama:
+
+networks:
+  focus-day-network:
+    driver: bridge
