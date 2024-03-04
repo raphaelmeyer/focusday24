@@ -18,7 +18,7 @@ Als Teil des Setups:
 
 1. Visual Studio Code direkt durch den Microsoft Store installieren
 2. [WSL installieren](./wsl_setup/installWSL_de.md)
-3. [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) über den Installer installieren
+3. [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) über den Installer installieren und die Applikation starten
 4. Den Root-Ordner dieser Git-Repo in einem WSL Terminal öffnen
 5. Mithilfe von `code .` diesen Ordner in Visual Studio Code öffnen
 
@@ -65,6 +65,8 @@ Du wirst ganz links im Visual Studio Code-Fenster einige Icons sehen, darunter w
 
 Klicke im Remote Explorer den Button *Open Folder in Container*:
 
+Falls dieser Button nicht erscheint, weil bereits andere Dev-Containers vorhanden sind, öffne die Command-Palette mit `Ctrl + Shift + P` und gib den Befehl `Dev Containers: Open Folder in Container...` ein.
+
 ![VSCode Remote Explorer Button](./wsl_setup/images/open_in_container.png)
 
 Wähle daraufhin einen der drei Projektordner aus:
@@ -106,11 +108,10 @@ Das Projekt ist eine Monorepo für Frontends und Backend zugleich. Das ist für 
 
 Du kannst jeden dieser Ordner in VSCode als Workspace öffnen und mit <kbd>Ctrl+Shift+P</kbd> den Command `Dev Containers: Open Folder in Container` ausführen. VSCode wird die Dev Container anhand der `docker-compose.yaml` und dem `Dockerfile` im ensprechenden Ordner bauen und ausführen. Nun ist das Sub-Projekt in einem Docker Container geöffnet und dir stehen die fürs Projekt relevanten oben genannten Services zur Verfügung!
 
-## Einschränkungen
-Im Moment kannst du nicht gleichzeitig an zwei Projekten arbeiten. Starte Visual Studio Code neu wenn du zum Beispiel vom Frontend zum Backend wechselst, oder nutze den Remote Explorer um den Container zu wechseln wenn du an einem anderen Projekt arbeiten möchtest. Hierzu noch folgende Command Palette (<kbd>Ctrl+Shift+P</kbd>) Funktionen, die dir dabei helfen könnten:
-
-- Dev Containers: Rebuild Container
-- Dev Containers: Open Folder in Container
+## Wechseln des Dev-Containers
+Im Moment kannst du nicht gleichzeitig an zwei Projekten arbeiten. Wenn du zum Beispiel vom Frontend zum Backend wechseln möchtest, führe folgende Befehle aus:
+- `docker rm backend_container` (möchtest du in den Desktop-Container wechseln, `docker rm desktop_container`, oder `docker rm backend_container` möchtest du in den Backend-Container wechseln)
+- Starte in der Command Palette (<kbd>Ctrl+Shift+P</kbd>) den Befehl "Dev Containers: Open Folder in Container" und wähle den gewünschten Ordner
 
 # Lokales LLM mit Ollama nutzen
 Mit der `docker-compose.yml` haben wir bereits einen Container bereitgestellt, der einen Ollama-Server ausführt. Dieser stellt dir verschiedene LLMs bereit, die lokal auf Ihrem Rechner laufen können. Welche Modelle du ausprobieren möchtest, liegt bei dir. Aber um sie herunterzuladen, müsstest du in den Ollama-Container gelangen. Wenn es dir gelungen ist, einen Dev Container in Visual Studio Code zu starten, läuft der Ollama-Server höchstwahrscheinlich bereits. Du kannst dies mit `docker ps` überprüfen, und solltest eine Ausgabe sehen, die der folgenden ähnlich ist
