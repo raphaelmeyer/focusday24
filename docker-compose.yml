@@ -74,19 +74,18 @@ services:
       dockerfile: ./Dockerfile
     container_name: frontend_container
     volumes:
-      - ./:/workspace
-  
+      - ./:/workspace:cached
     ports:
       - "8003:6734"
     env_file:
       - .env
       - ./frontend/.env.${ENVIRONMENT:-dev}
     depends_on:
-      - backend
       - ollama
       - focusday24
     networks:
       - focus-day-network
+    command: sleep infinity
 
   desktop:
     build:
@@ -94,18 +93,18 @@ services:
       dockerfile: ./Dockerfile
     container_name: desktop_container
     volumes:
-      - ./:/workspace
+      - ./:/workspace:cached
     ports:
       - "8004:80"
     env_file:
       - .env
       - ./desktop/.env.${ENVIRONMENT:-dev}
     depends_on:
-      - backend
       - ollama
       - focusday24
     networks:
       - focus-day-network
+    command: sleep infinity
 
   backend:
     build:
@@ -113,7 +112,7 @@ services:
       dockerfile: ./Dockerfile
     container_name: backend_container
     volumes:
-      - ./:/workspace
+      - ./:/workspace:cached
     env_file:
       - .env
       - ./backend/.env.${ENVIRONMENT:-dev}
@@ -124,6 +123,7 @@ services:
       - focusday24
     networks:
       - focus-day-network
+    command: sleep infinity
 
 volumes:
   mongodb_data:

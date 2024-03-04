@@ -5,15 +5,14 @@
   "workspaceFolder": "/workspace",
   "customizations": {
     "vscode": {
-      "extensions": ["dbaeumer.vscode-eslint"],
+      "extensions": [
+        "dbaeumer.vscode-eslint"
+      ],
       "settings": {
         "terminal.integrated.shell.linux": "/bin/bash"
       }
     }
   },
-  
-  "shutdownAction": "stopCompose",
-
-  "overrideCommand": true
+  "shutdownAction": "none",
+  "overrideCommand": false
 }
-
