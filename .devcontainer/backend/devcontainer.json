@@ -14,5 +14,7 @@
     }
   },
   "shutdownAction": "none",
-  "overrideCommand": false
+  "overrideCommand": false,
+  "remoteUser": "dev",
+  "containerUser": "dev"
 }

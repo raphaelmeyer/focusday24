@@ -1,3 +1,9 @@
 FROM focusday24:latest
 
 # Here you can extend the image with frontend specific libraries and tools
+
+USER root
+
+RUN apt-get update && apt-get install -y nodejs npm
+
+USER dev

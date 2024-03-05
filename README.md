@@ -1,5 +1,9 @@
 ![Time Tracker Logo](logo.svg)
 
+# Getting started
+
+    docker compose up
+
 # bbv Time Tracker
 
 Die bbv hat den PMWeb – ein praktisches Tool zum Loggen deiner Arbeitszeiten und Projekte. Doch was ihm fehlt ist ein schnelles Zeittracking. Wir möchten verhindern, dass du dich am Ende des Tages an all die Dinge, die du gemacht hast, zurückerinnern musst. Damit es einfacher wird die Zeiterfassung in deinen Workflow zu integrieren, bauen wir eine kleine einfache Applikation zur Zeiterfassung mit Hilfe von Generative AI.

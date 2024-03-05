@@ -8,8 +8,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 FROM focusday24base as focusday24dev
 
 ARG USERNAME=dev
-ARG MYUID=1001
-ARG MYGID=1001
+ARG MYUID=1000
+ARG MYGID=1000
 
 RUN groupadd --gid $MYGID $USERNAME && useradd --uid $MYUID --gid $MYGID -m -s /bin/bash $USERNAME
 RUN adduser $USERNAME sudo
