@@ -4,6 +4,6 @@ FROM focusday24:latest
 
 USER root
 
-RUN apt-get update && apt-get install -y nodejs npm
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && apt-get update && apt-get install -y nodejs
 
 USER dev
